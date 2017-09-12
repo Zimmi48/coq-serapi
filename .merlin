@@ -21,6 +21,9 @@ B _build/sertop
 S coq-js
 B _build/coq-js
 
+S test
+B _build/test
+
 FLG -safe-string
 
 PKG threads threads.posix coq.intf coq.ltac coq.idetop cmdliner ppx_import sexplib ppx_sexp_conv js_of_ocaml.ppx yojson
