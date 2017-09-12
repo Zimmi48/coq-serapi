@@ -85,3 +85,38 @@ let query_goal id =
   )
   |> exec_cmd
   |> process_goal_query_answer
+
+let flatten_goals (goals : 'a Proof.pre_goals) : 'a list =
+  let open Proof in
+  List.fold_left
+    (fun goals (before, after) -> before @ goals @ after)
+    goals.fg_goals
+    goals.bg_goals
+
+let script_with_goal_info script =
+  let rec aux goals_before = function
+    | [] ->
+       []
+    | (id, loc) :: t ->
+       let goals_after =
+         query_goal id
+         |> Option.lift
+              (fun g ->
+                flatten_goals g
+                |> List.map (fun goal -> goal.Serapi_goals.name))
+       in
+       let solved_and_new_goals =
+         Option.lift2
+           (fun goals_before goals_after ->
+             ( List.filter (fun g -> not (List.mem g goals_after)) goals_before
+             , List.filter (fun g -> not (List.mem g goals_before)) goals_after
+             )
+           )
+           goals_before goals_after
+       in
+       ( Loc.(String.sub script loc.bp (loc.ep - loc.bp))
+       , solved_and_new_goals
+       ) :: aux goals_after t
+  in
+  exec_script script
+  |> aux None
