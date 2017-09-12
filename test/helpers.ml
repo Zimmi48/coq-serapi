@@ -67,7 +67,8 @@ let exec_script script =
   ids
 
 let process_goal_query_answer = function
-  | [ ObjList [ CoqGoal goals ] ; Completed ] -> goals
+  | [ ObjList [ CoqGoal goals ] ; Completed ] -> Some goals
+  | [ ObjList [] ; Completed ] -> None
   | error -> process_error error
 
 let query_goal id =
@@ -84,16 +85,3 @@ let query_goal id =
   )
   |> exec_cmd
   |> process_goal_query_answer
-
-(*
-(* Proof tree is actually a rooted alternated DAG because of multigoal tactics *)
-type prooftree = action_on_goals list
-and action_on_goals = { active_goals : goal_info list; action: action }
-and goal_info = { goal : Goal.goal; solved : bool }
-and action = Tactic of Goal.goal list * tactic_info | Focus of prooftree
-(* The Unfocus command is not supported *)
-and tactic_info = {
-  tactic : Pp.std_ppcmds;
-  with_end_tac : bool
-}
- *)

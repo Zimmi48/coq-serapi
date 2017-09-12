@@ -3,17 +3,20 @@
 open Helpers
 
 let input_script =
-  "Goal forall n m, n + m = m + n. induction n. (* comment *) all: cycle 1. all: cycle 1. { easy. } idtac."
+  "Goal forall n m, n + m = m + n. induction n. (* comment *) all: cycle 1. all: cycle 1. { easy. } idtac. Abort."
 
-let print_goals goals =
-  let open Proof in
-  let open Serapi_goals in
-  "\t\t(* focussed goals: " ^ (
-    goals.fg_goals
-    |> List.map (fun goal -> goal.name)
-    |> String.concat ", "
-  ) ^ " *)"
-  |> print_endline
+let print_goals = function
+  | None ->
+     print_endline "\t\t(* not in proof mode *)"
+  | Some goals ->
+     let open Proof in
+     let open Serapi_goals in
+     "\t\t(* focussed goals: " ^ (
+       goals.fg_goals
+       |> List.map (fun goal -> goal.name)
+       |> String.concat ", "
+     ) ^ " *)"
+     |> print_endline
 
 let ids_and_locs = exec_script input_script
 
