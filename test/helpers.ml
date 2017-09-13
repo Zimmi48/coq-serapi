@@ -8,13 +8,30 @@ let ser_prelude_list =
   List.map (aux "plugins") Sertop_prelude.coq_init_plugins
   @ List.map (aux "theories") Sertop_prelude.coq_init_theories
 
-[@@@ocaml.warning "-42"] 
+
+let require_libs =
+  let open Names in
+  [
+    ( List.rev_map Id.of_string ["Coq";"Init";"Prelude"]
+      |> DirPath.make
+    , Coq_config.coqlib ^ "/theories/Init/Prelude.vo"
+    , Some true
+    )
+  ;
+    ( List.rev_map Id.of_string ["Coq";"Init";"Notations"]
+      |> DirPath.make
+    , Coq_config.coqlib ^ "/theories/Init/Notations.vo"
+    , None
+    )
+  ]
+
+[@@@ocaml.warning "-42"]
 let init () =
   Sertop_init.coq_init
     { Sertop_init.fb_handler = (fun _ -> ())
     ; iload_path = ser_prelude_list
-    ; require_libs = [Sertop_prelude.coq_prelude_mod Coq_config.coqlib]
-    ; implicit_std = false
+    ; require_libs = require_libs
+    ; implicit_std = true
     ; aopts =
         { Sertop_init.enable_async = None
         ; async_full = false
