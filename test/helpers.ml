@@ -1,3 +1,5 @@
+(* SerAPI initialization boilerplate *)
+
 let ser_prelude_list =
   let aux prefix l =
     ( "Coq" :: l
@@ -40,6 +42,8 @@ let init () =
     ; top_name = "Top"
     ; ml_load = None
     }
+
+(* Interesting stuff starts here *)
 
 open Serapi_protocol
 
@@ -137,3 +141,11 @@ let script_with_goal_info script =
   in
   exec_script script
   |> aux None
+
+(* Let's structure the thing a bit more! *)
+
+type coq_document_part
+   = UnchangedPart of string
+   | CoqScript of (string * string list * string list) list
+
+type coq_document = coq_document_part list

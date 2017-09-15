@@ -1,4 +1,4 @@
-(* ocamlbuild -use-ocamlfind -j 4 -pkgs 'sexplib,dynlink,camlp5.gramlib,coq.ltac,coq.stm,coq.idetop' -tag 'linkall' -I sertop test/test.native && ./test.native *)
+(* ocamlbuild -use-ocamlfind -j 4 -pkgs 'core_kernel,sexplib,dynlink,camlp5.gramlib,coq.ltac,coq.stm,coq.idetop' -tag 'linkall' -I sertop test/test.native && ./test.native *)
 
 let input_script filename =
   Core_kernel.Std.In_channel.read_lines filename
