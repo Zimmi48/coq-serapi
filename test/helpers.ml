@@ -107,6 +107,48 @@ let query_goal id =
   |> exec_cmd
   |> process_goal_query_answer
 
+type 'a coq_document_part
+  = Script of 'a
+  | Command of (Stateid.t * Loc.t)
+
+(* a refactoring function will generally act on this *)
+type unstructured_script =
+  { proof_start
+    : Stateid.t * Loc.t * Constr.t Serapi_goals.reified_goal Proof.pre_goals
+  ; proof_script
+    : (Stateid.t * Loc.t * Constr.t Serapi_goals.reified_goal Proof.pre_goals)
+        list
+  ; proof_end : Stateid.t * Loc.t
+  }
+
+type 'a coq_document = { script : string ; parts : 'a coq_document_part list }
+
+let coq_document_of_script script =
+  let rec proof_script = function
+    | [] ->
+       failwith "Unfinished proof script (not yet supported)."
+    | (id, loc) :: t ->
+       match query_goal id with
+       | None ->
+          ([], (id, loc), t)
+       | Some goals ->
+          let (proof_script, proof_end, t) = proof_script t in
+          ( (id, loc, goals) :: proof_script, proof_end, t)
+  in
+  let rec coq_document = function
+    | [] ->
+       []
+    | (id, loc) :: t ->
+       match query_goal id with
+       | None ->
+          Command (id, loc) :: coq_document t
+       | Some goals ->
+          let (proof_script, proof_end, t) = proof_script t in
+          Script { proof_start = (id, loc, goals) ; proof_script ; proof_end }
+          :: coq_document t
+  in
+  exec_script script |> coq_document
+
 let flatten_goals (goals : 'a Proof.pre_goals) : 'a list =
   let open Proof in
   List.fold_left
@@ -141,11 +183,3 @@ let script_with_goal_info script =
   in
   exec_script script
   |> aux None
-
-(* Let's structure the thing a bit more! *)
-
-type coq_document_part
-   = UnchangedPart of string
-   | CoqScript of (string * string list * string list) list
-
-type coq_document = coq_document_part list
