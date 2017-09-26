@@ -27,15 +27,15 @@ let require_libs =
     )
   ]
 
-[@@@ocaml.warning "-42"]
 let init () =
-  Sertop_init.coq_init
-    { Sertop_init.fb_handler = (fun _ -> ())
+  let open Sertop_init in
+  coq_init
+    { fb_handler = (fun _ -> ())
     ; iload_path = ser_prelude_list
     ; require_libs = require_libs
     ; implicit_std = true
     ; aopts =
-        { Sertop_init.enable_async = None
+        { enable_async = None
         ; async_full = false
         ; deep_edits = false
         }
@@ -147,7 +147,15 @@ let coq_document_of_script script =
           Script { proof_start = (id, loc, goals) ; proof_script ; proof_end }
           :: coq_document t
   in
-  exec_script script |> coq_document
+  { script = script ; parts = exec_script script |> coq_document }
+
+type proof_action = Focus of proof_action list | Tactic of string
+
+type focussed_script =
+  { proof_start : Stateid.t * Loc.t
+  ; proof_script : proof_action list
+  ; proof_end : Loc.t
+  }
 
 let flatten_goals (goals : 'a Proof.pre_goals) : 'a list =
   let open Proof in
