@@ -148,7 +148,7 @@ let coq_document_of_script script =
           :: coq_document t
   in
   { script = script ; parts = exec_script script |> coq_document }
-
+(*
 type proof_action = Focus of proof_action list | Tactic of string
 
 type focussed_script =
@@ -156,6 +156,7 @@ type focussed_script =
   ; proof_script : proof_action list
   ; proof_end : Loc.t
   }
+*)
 
 let flatten_goals (goals : 'a Proof.pre_goals) : 'a list =
   let open Proof in
